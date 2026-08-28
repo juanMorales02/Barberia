@@ -1,0 +1,314 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #e9e3d8;
+  color: #2b2119;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 15px 40px 15px;
+}
+
+.encabezado {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 4px double #6b4a2b;
+}
+
+.encabezado h1 {
+  font-family: Georgia, serif;
+  color: #6b4a2b;
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.encabezado p {
+  color: #8a7a63;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.boton-nuevo {
+  display: block;
+  margin: 0 auto 25px auto;
+  background-color: #6b4a2b;
+  color: #f5f0e6;
+  border: none;
+  padding: 11px 24px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.boton-nuevo:hover {
+  background-color: #82603d;
+}
+
+.sin-resultados {
+  text-align: center;
+  color: #8a7a63;
+  margin-top: 30px;
+  font-style: italic;
+}
+
+.tarjeta-servicio {
+  background-color: #fbf8f2;
+  border: 1px solid #d8cdb8;
+  border-left: 5px solid #6b4a2b;
+  border-radius: 5px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.tarjeta-servicio.sin-pagar {
+  border-left: 5px solid #a0402f;
+  background-color: #fbeeea;
+}
+
+.tarjeta-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tarjeta-servicio h3 {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  color: #2b2119;
+}
+
+.tarjeta-servicio .tipo-servicio {
+  color: #6b4a2b;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 3px 0 8px 0;
+}
+
+.fila-datos {
+  font-size: 14px;
+  color: #443a2e;
+  margin: 3px 0;
+}
+
+.fila-datos b {
+  color: #2b2119;
+}
+
+.icono-pago {
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.estado {
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 9px;
+  border-radius: 10px;
+}
+
+.estado.pagado {
+  background-color: #dcecd8;
+  color: #3c6b34;
+}
+
+.estado.pendiente {
+  background-color: #f3e6c4;
+  color: #8a6a12;
+}
+
+.estado.fiado {
+  background-color: #f3d6d0;
+  color: #a0402f;
+}
+
+.estrellas {
+  margin: 8px 0 4px 0;
+  font-size: 17px;
+  color: #d8cdb8;
+  letter-spacing: 2px;
+}
+
+.estrellas .llena {
+  color: #c99a2e;
+}
+
+.estrellas.baja .llena {
+  color: #a0402f;
+}
+
+.texto-calificacion-baja {
+  color: #a0402f;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.observaciones {
+  font-style: italic;
+  color: #6b5f4c;
+  font-size: 13px;
+  margin-top: 8px;
+  border-top: 1px dashed #d8cdb8;
+  padding-top: 8px;
+}
+
+.tarjeta-botones {
+  margin-top: 12px;
+}
+
+.tarjeta-botones button {
+  margin-right: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+  border: 1px solid #6b4a2b;
+  background-color: #fbf8f2;
+  color: #6b4a2b;
+}
+
+.boton-eliminar {
+  border-color: #a0402f !important;
+  color: #a0402f !important;
+}
+
+.confirmar-eliminar {
+  margin-top: 12px;
+  border: 1px solid #a0402f;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #fbeeea;
+}
+
+.confirmar-eliminar p {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.confirmar-eliminar button {
+  margin-right: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+  border: 1px solid #a0402f;
+  background-color: #fbf8f2;
+  color: #a0402f;
+}
+
+/* modal */
+
+.fondo-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(43, 33, 25, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.caja-modal {
+  background-color: #fbf8f2;
+  padding: 22px;
+  width: 100%;
+  max-width: 410px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 6px;
+}
+
+.caja-modal h2 {
+  font-family: Georgia, serif;
+  color: #6b4a2b;
+  margin-bottom: 15px;
+}
+
+.campo-formulario {
+  margin-bottom: 12px;
+}
+
+.campo-formulario label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #6b5f4c;
+}
+
+.campo-formulario input,
+.campo-formulario select,
+.campo-formulario textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #c9bfab;
+  border-radius: 4px;
+  background-color: #fff;
+  font-family: inherit;
+}
+
+.campo-formulario textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.selector-estrellas button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #d8cdb8;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.selector-estrellas button.activa {
+  color: #c99a2e;
+}
+
+.mensaje-error {
+  background-color: #f3d6d0;
+  color: #a0402f;
+  padding: 9px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.botones-modal {
+  margin-top: 18px;
+}
+
+.botones-modal button {
+  padding: 9px 18px;
+  margin-right: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.boton-guardar {
+  background-color: #6b4a2b;
+  color: #f5f0e6;
+  border: none;
+  font-weight: bold;
+}
+
+.boton-guardar:hover {
+  background-color: #82603d;
+}
+
+.boton-cancelar {
+  background-color: #e9e3d8;
+  border: 1px solid #c9bfab;
+  color: #443a2e;
+}
