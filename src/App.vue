@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
@@ -9,12 +9,24 @@ import 'sweetalert2/dist/sweetalert2.min.css'
 const barberos = ['Don Ramiro', 'Kevin', 'Andrés']
 
 const catalogoServicios = [
-  { nombre: 'Corte Clásico', precio: 12000 },
-  { nombre: 'Corte Moderno de Precisión', precio: 18000 },
-  { nombre: 'Perfilado de Barba & Ritual', precio: 15000 },
-  { nombre: 'Corte Clásico & Arreglo de Barba', precio: 25000 },
-  { nombre: 'Cejas', precio: 6000 },
-  { nombre: 'Tinte', precio: 30000 }
+   { nombre: 'Corte Afro', precio: 22000 },
+  { nombre: 'Corte Curly Shag', precio: 26000 },
+  { nombre: 'Corte Crew Cut', precio: 18000 },
+  { nombre: 'Corte Ivy League', precio: 24000 },
+  { nombre: 'Corte Quiff', precio: 28000 },
+  { nombre: 'Corte French Crop', precio: 27000 },
+  { nombre: 'Corte Caesar', precio: 20000 },
+  { nombre: 'Corte Slick Back', precio: 30000 },
+  { nombre: 'Corte Flat Top', precio: 23000 },
+  { nombre: 'Corte Mohawk', precio: 32000 }
+]
+
+const catalogoServiciosExtra = [
+  { nombre: 'Arreglo de Barba', precio: 12000 },
+  { nombre: 'Diseño de Cejas', precio: 8000 },
+  { nombre: 'Coloración', precio: 20000 },
+  { nombre: 'Hidratación Capilar', precio: 15000 },
+  { nombre: 'Limpieza Facial', precio: 14000 }
 ]
 
 const metodosPago = ['Efectivo', 'Transferencia', 'Tarjeta / Débito']
@@ -25,10 +37,10 @@ const horaMaxima = '20:00'
 /* ---------- estilos de swal reutilizables ---------- */
 
 const swalBase = {
-  background: '#1a1a1a',
-  color: '#ffffff',
-  confirmButtonColor: '#3b82f6',
-  cancelButtonColor: '#3c3c3c',
+  background: '#ffffff',
+  color: '#16181d',
+  confirmButtonColor: '#f4923a',
+  cancelButtonColor: '#6b7280',
   customClass: {
     popup: 'swal-heritage'
   }
@@ -70,6 +82,7 @@ const fPrecio = ref(0)
 const fMetodoPago = ref('')
 const fEstadoPago = ref('Pendiente')
 const fMontoAbonado = ref('')
+const fServiciosExtra = ref([])
 
 /* ---------- utilidades ---------- */
 
@@ -114,19 +127,46 @@ function calcularSaldo() {
   return Number(fPrecio.value || 0) - Number(fMontoAbonado.value || 0)
 }
 
+/* ---------- monto abonado: entrada con formato de pesos en vivo ---------- */
+
+const fMontoAbonadoDisplay = computed({
+  get() {
+    return fMontoAbonado.value === '' ? '' : formatearNumero(fMontoAbonado.value)
+  },
+  set(valor) {
+    const soloDigitos = String(valor).replace(/\D/g, '')
+    fMontoAbonado.value = soloDigitos === '' ? '' : Number(soloDigitos)
+  }
+})
+
 function abrirSelector(evento) {
   if (evento.target.showPicker) {
     evento.target.showPicker()
   }
 }
 
-function actualizarPrecioServicio() {
-  fPrecio.value = 0
+/* ---------- arancel: corte principal + servicios extra seleccionados ---------- */
+
+function precioDelServicio(nombre) {
   for (let i = 0; i < catalogoServicios.length; i++) {
-    if (catalogoServicios[i].nombre === fServicio.value) {
-      fPrecio.value = catalogoServicios[i].precio
-    }
+    if (catalogoServicios[i].nombre === nombre) return catalogoServicios[i].precio
   }
+  return 0
+}
+
+function precioDelExtra(nombre) {
+  for (let i = 0; i < catalogoServiciosExtra.length; i++) {
+    if (catalogoServiciosExtra[i].nombre === nombre) return catalogoServiciosExtra[i].precio
+  }
+  return 0
+}
+
+function recalcularPrecio() {
+  let total = precioDelServicio(fServicio.value)
+  for (let i = 0; i < fServiciosExtra.value.length; i++) {
+    total += precioDelExtra(fServiciosExtra.value[i])
+  }
+  fPrecio.value = total
 }
 
 /* ---------- modal: abrir / cerrar ---------- */
@@ -141,6 +181,7 @@ function limpiarFormulario() {
   fMetodoPago.value = ''
   fEstadoPago.value = 'Pendiente'
   fMontoAbonado.value = ''
+  fServiciosExtra.value = []
 }
 
 function abrirModalNuevo() {
@@ -162,6 +203,7 @@ function abrirModalEditar(servicio) {
   fMetodoPago.value = servicio.metodoPago
   fEstadoPago.value = servicio.estadoPago
   fMontoAbonado.value = servicio.montoAbonado || ''
+  fServiciosExtra.value = servicio.serviciosExtra ? [...servicio.serviciosExtra] : []
   modalAbierto.value = true
 }
 
@@ -233,6 +275,7 @@ function guardarServicio() {
         servicios.value[i].metodoPago = fMetodoPago.value
         servicios.value[i].estadoPago = fEstadoPago.value
         servicios.value[i].montoAbonado = montoAbonadoFinal
+        servicios.value[i].serviciosExtra = [...fServiciosExtra.value]
       }
     }
     alertaExito('Registro actualizado correctamente.')
@@ -248,6 +291,7 @@ function guardarServicio() {
       metodoPago: fMetodoPago.value,
       estadoPago: fEstadoPago.value,
       montoAbonado: montoAbonadoFinal,
+      serviciosExtra: [...fServiciosExtra.value],
       etapa: 'pendiente',
       calificacion: 0,
       observaciones: ''
@@ -293,6 +337,44 @@ function eliminarServicio(id) {
 function marcarCompletado(servicio) {
   servicio.etapa = 'calificando'
   servicio.calificacion = 5
+  servicio.montoPago = ''
+}
+
+function actualizarMontoPago(servicio, evento) {
+  const soloDigitos = evento.target.value.replace(/\D/g, '')
+  servicio.montoPago = soloDigitos === '' ? '' : Number(soloDigitos)
+  evento.target.value = servicio.montoPago === '' ? '' : formatearNumero(servicio.montoPago)
+}
+
+function registrarPagoFaltante(servicio) {
+  const monto = Number(servicio.montoPago || 0)
+
+  if (!monto || monto <= 0) {
+    alertaError('Ingresa el monto que se va a pagar.')
+    return
+  }
+
+  const abonadoPrevio = servicio.montoAbonado || 0
+  const nuevoAbonado = abonadoPrevio + monto
+  const saldoRestante = servicio.precio - nuevoAbonado
+
+  if (saldoRestante > 0) {
+    servicio.montoAbonado = nuevoAbonado
+    servicio.estadoPago = 'Abonado'
+    servicio.montoPago = ''
+    Swal.fire({
+      ...swalBase,
+      icon: 'warning',
+      title: 'Saldo no cubierto',
+      text: `Aún queda un saldo de $${formatearNumero(saldoRestante)} CLP. Debes cancelarlo por completo para poder calificar el servicio.`
+    })
+    return
+  }
+
+  servicio.montoAbonado = servicio.precio
+  servicio.estadoPago = 'Pagado'
+  servicio.montoPago = ''
+  alertaExito('Pago registrado. Cuenta saldada.')
 }
 
 function elegirEstrella(servicio, numero) {
@@ -330,7 +412,10 @@ function volverSinCalificar(servicio) {
     <div class="lista-tarjetas">
       <div v-for="servicio in servicios" :key="servicio.id" class="tarjeta-servicio">
         <div class="tarjeta-encabezado">
-          <h3>{{ servicio.cliente }}</h3>
+          <div class="cliente-info">
+            <div class="avatar">{{ servicio.cliente.charAt(0).toUpperCase() }}</div>
+            <h3>{{ servicio.cliente }}</h3>
+          </div>
           <span
             class="estado"
             :class="{
@@ -346,7 +431,7 @@ function volverSinCalificar(servicio) {
 
         <div class="seccion-tarjeta datos-tarjeta">
           <div>
-            <p class="etiqueta-dato">Servicio</p>
+            <p class="etiqueta-dato">Corte principal</p>
             <p class="valor-dato">{{ servicio.servicio }}</p>
           </div>
           <div>
@@ -359,12 +444,19 @@ function volverSinCalificar(servicio) {
           </div>
         </div>
 
+        <div class="seccion-tarjeta" v-if="servicio.serviciosExtra && servicio.serviciosExtra.length">
+          <p class="etiqueta-dato">Servicios extra</p>
+          <div class="lista-extras">
+            <span class="chip-extra" v-for="extra in servicio.serviciosExtra" :key="extra">● {{ extra }}</span>
+          </div>
+        </div>
+
         <div class="divisor-tarjeta"></div>
 
-        <div v-if="servicio.estadoPago === 'Abonado'" class="seccion-tarjeta">
+        <div v-if="servicio.estadoPago === 'Abonado'" class="seccion-tarjeta caja-financiera">
           <div class="datos-tarjeta">
             <div>
-              <p class="etiqueta-dato">Arancel total</p>
+              <p class="etiqueta-dato">Total</p>
               <p class="precio-dato">${{ formatearNumero(servicio.precio) }} <span>CLP</span></p>
             </div>
             <div class="alineado-derecha">
@@ -380,10 +472,9 @@ function volverSinCalificar(servicio) {
           </div>
         </div>
 
-        <div v-else class="seccion-tarjeta datos-tarjeta">
+        <div v-else class="seccion-tarjeta datos-tarjeta caja-financiera">
           <div>
-            <p class="etiqueta-dato" v-if="servicio.etapa === 'completado'">Total liquidado</p>
-            <p class="etiqueta-dato" v-else>Arancel fijado</p>
+            <p class="etiqueta-dato">Total</p>
             <p class="precio-dato">${{ formatearNumero(servicio.precio) }} <span>CLP</span></p>
           </div>
           <div class="alineado-derecha">
@@ -409,33 +500,60 @@ function volverSinCalificar(servicio) {
         </div>
 
         <div class="seccion-tarjeta" v-else-if="servicio.etapa === 'calificando'">
-          <div class="bloque-calificacion">
-            <div class="fila-calificacion">
-              <p class="titulo-aviso"><span class="material-symbols-outlined icono">star</span> Calificación del servicio</p>
-              <div class="selector-estrellas">
-                <button
-                  type="button"
-                  v-for="n in 5"
-                  :key="n"
-                  :class="{ activa: n <= servicio.calificacion }"
-                  @click="elegirEstrella(servicio, n)"
-                >★</button>
-                <span class="texto-estrellas">{{ servicio.calificacion }}.0 · {{ textoCalificacion(servicio.calificacion) }}</span>
+          <div class="bloque-calificacion caja-financiera">
+            <template v-if="servicio.estadoPago !== 'Pagado'">
+              <p class="titulo-aviso"><span class="material-symbols-outlined icono">payments</span> Pago pendiente</p>
+              <p>Debes cancelar el saldo faltante antes de poder calificar el servicio.</p>
+              <div class="fila-calificacion">
+                <div>
+                  <p class="etiqueta-dato">Saldo a pagar</p>
+                  <p class="precio-dato dorado">${{ formatearNumero(servicio.precio - (servicio.montoAbonado || 0)) }} <span>CLP</span></p>
+                </div>
               </div>
-            </div>
-            <label class="etiqueta-dato">Observaciones técnicas de cabina</label>
-            <textarea v-model="servicio.observaciones" placeholder="Ej: texturizado con navaja, tratamiento capilar, etc."></textarea>
-            <div class="fila-acciones-tarjeta">
-              <button class="boton-completar" @click="guardarCalificacion(servicio)">
-                <span class="material-symbols-outlined icono">check</span> Aceptar y guardar calificación
-              </button>
-              <button class="boton-volver" @click="volverSinCalificar(servicio)">Cancelar y volver</button>
-            </div>
+              <label class="etiqueta-dato">Monto que va a pagar (CLP)</label>
+              <input
+                type="text"
+                inputmode="numeric"
+                placeholder="0"
+                :value="servicio.montoPago === '' || servicio.montoPago == null ? '' : formatearNumero(servicio.montoPago)"
+                @input="actualizarMontoPago(servicio, $event)"
+              />
+              <div class="fila-acciones-tarjeta">
+                <button class="boton-completar" @click="registrarPagoFaltante(servicio)">
+                  <span class="material-symbols-outlined icono">check</span> Registrar pago
+                </button>
+                <button class="boton-volver" @click="volverSinCalificar(servicio)">Cancelar y volver</button>
+              </div>
+            </template>
+
+            <template v-else>
+              <div class="fila-calificacion">
+                <p class="titulo-aviso"><span class="material-symbols-outlined icono">star</span> Calificación del servicio</p>
+                <div class="selector-estrellas">
+                  <button
+                    type="button"
+                    v-for="n in 5"
+                    :key="n"
+                    :class="{ activa: n <= servicio.calificacion }"
+                    @click="elegirEstrella(servicio, n)"
+                  >★</button>
+                  <span class="texto-estrellas">{{ servicio.calificacion }}.0 · {{ textoCalificacion(servicio.calificacion) }}</span>
+                </div>
+              </div>
+              <label class="etiqueta-dato">Observaciones técnicas de cabina</label>
+              <textarea v-model="servicio.observaciones" placeholder="Ej: texturizado con navaja, tratamiento capilar, etc."></textarea>
+              <div class="fila-acciones-tarjeta">
+                <button class="boton-completar" @click="guardarCalificacion(servicio)">
+                  <span class="material-symbols-outlined icono">check</span> Aceptar y guardar calificación
+                </button>
+                <button class="boton-volver" @click="volverSinCalificar(servicio)">Cancelar y volver</button>
+              </div>
+            </template>
           </div>
         </div>
 
         <div class="seccion-tarjeta" v-else>
-          <div class="bloque-calificacion bloque-calificacion-lectura">
+          <div class="bloque-calificacion bloque-calificacion-lectura caja-financiera">
             <div class="fila-calificacion">
               <p class="titulo-aviso-simple">Calificación de servicio</p>
               <div class="estrellas-fijas" :class="{ baja: servicio.calificacion <= 2 }">
@@ -446,11 +564,6 @@ function volverSinCalificar(servicio) {
             <p v-if="servicio.calificacion <= 2" class="texto-calificacion-baja">Cliente insatisfecho, revisar con el barbero</p>
             <p class="etiqueta-dato-dorado">Observaciones técnicas</p>
             <p class="observaciones">"{{ servicio.observaciones || 'Sin observaciones registradas.' }}"</p>
-          </div>
-          <div class="divisor-tarjeta"></div>
-          <div class="fila-acciones-tarjeta">
-            <button class="boton-modificar" @click="abrirModalEditar(servicio)">Modificar registro</button>
-            <button class="enlace-eliminar" @click="pedirConfirmacionEliminar(servicio)">Eliminar</button>
           </div>
         </div>
       </div>
@@ -472,9 +585,9 @@ function volverSinCalificar(servicio) {
 
           <div class="fila-formulario">
             <div class="campo-formulario">
-              <label>Servicio a realizar</label>
-              <select v-model="fServicio" @change="actualizarPrecioServicio">
-                <option value="">Selecciona...</option>
+              <label>Corte de cabello / Principal</label>
+              <select v-model="fServicio" @change="recalcularPrecio">
+                <option value="">Seleccionar corte...</option>
                 <option v-for="s in catalogoServicios" :key="s.nombre" :value="s.nombre">{{ s.nombre }}</option>
               </select>
             </div>
@@ -509,10 +622,34 @@ function volverSinCalificar(servicio) {
             </div>
           </div>
 
+          <div class="campo-formulario">
+            <div class="encabezado-campo">
+              <label>Servicios adicionales</label>
+              <span class="badge-opcional">Opcional</span>
+            </div>
+            <div class="grid-extras">
+              <label class="opcion-extra" v-for="extra in catalogoServiciosExtra" :key="extra.nombre">
+                <input type="checkbox" v-model="fServiciosExtra" :value="extra.nombre" @change="recalcularPrecio">
+                <span>
+                  <span class="nombre-extra">{{ extra.nombre }}</span>
+                  <span class="precio-extra">+${{ formatearNumero(extra.precio) }}</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
           <div class="fila-formulario">
             <div class="campo-formulario">
               <label>Arancel fijado (CLP)</label>
-              <input type="number" v-model="fPrecio" readonly placeholder="Selecciona un servicio">
+              <div class="campo-dinero">
+                <span class="simbolo-dinero">$</span>
+                <input
+                  type="text"
+                  :value="fPrecio > 0 ? formatearNumero(fPrecio) : ''"
+                  readonly
+                  placeholder="Selecciona un servicio"
+                >
+              </div>
             </div>
             <div class="campo-formulario">
               <label>Método de pago acordado</label>
@@ -534,7 +671,10 @@ function volverSinCalificar(servicio) {
 
           <div class="campo-formulario" v-if="fEstadoPago === 'Abonado'">
             <label>Monto abonado (CLP)</label>
-            <input type="number" v-model="fMontoAbonado" placeholder="Ej: 50000">
+            <div class="campo-dinero">
+              <span class="simbolo-dinero">$</span>
+              <input type="text" inputmode="numeric" v-model="fMontoAbonadoDisplay" placeholder="Ej: 5.000">
+            </div>
           </div>
 
           <div class="aviso-saldo" v-if="fEstadoPago === 'Abonado'">
