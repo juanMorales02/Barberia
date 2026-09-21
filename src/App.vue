@@ -982,7 +982,7 @@ function eliminarServicioCatalogo(id) {
           <span class="material-symbols-outlined icono">point_of_sale</span> Cerrar caja
         </button>
         <button class="boton-nuevo" @click="abrirModalNuevo">
-          <span class="material-symbols-outlined icono">add_circle</span> + Nuevo servicio
+          <span class="material-symbols-outlined icono"></span> + Nuevo servicio
         </button>
       </div>
     </div>
